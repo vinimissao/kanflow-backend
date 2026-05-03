@@ -1,0 +1,18 @@
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.idea/
+*.iml
+.vscode/
+*.class
+*.log
+*.jar
+*.war
+*.ear
+.DS_Store
+Thumbs.db
+.env
+*.local
+# Credenciais locais (Spring Boot: ./config/application.yml tem prioridade sobre classpath)
+config/application.yml

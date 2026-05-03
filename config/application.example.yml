@@ -1,0 +1,12 @@
+# Copie este ficheiro para application.yml na mesma pasta (config/).
+# O Spring Boot carrega ./config/application.yml com PRIORIDADE sobre src/main/resources/application.yml
+# (ideal para a tua senha real do pgAdmin sem commitar no git).
+#
+#   copy application.example.yml application.yml   (CMD)
+#   Copy-Item application.example.yml application.yml   (PowerShell)
+#
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/kanflow
+    username: postgres
+    password: 12345678

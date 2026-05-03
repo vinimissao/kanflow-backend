@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: kanflow-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kanflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-12345678}
+      POSTGRES_DB: ${POSTGRES_DB:-kanflow}
+    ports:
+      - "5432:5432"
+    volumes:
+      - kanflow_pg_data:/var/lib/postgresql/data
+
+  api:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: kanflow-api
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - m2_cache:/root/.m2
+    environment:
+      SERVER_PORT: ${PORT:-9090}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-dev-only-change-me}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-kanflow}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-kanflow}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-12345678}
+    ports:
+      - "${PORT:-9090}:${PORT:-9090}"
+    depends_on:
+      - postgres
+    command: >
+      bash -lc "mvn -q -DskipTests spring-boot:run"
+
+volumes:
+  kanflow_pg_data:
+  m2_cache:
