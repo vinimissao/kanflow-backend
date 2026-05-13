@@ -22,7 +22,6 @@ public class JwtService {
             @Value("${security.jwt.secret}") String secret,
             @Value("${security.jwt.access-token-seconds:3600}") long accessTokenSeconds
     ) {
-        // HS256 requires >= 256-bit key. We'll pad/truncate deterministically if needed.
         byte[] bytes = secret.getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 32) {
             byte[] padded = new byte[32];

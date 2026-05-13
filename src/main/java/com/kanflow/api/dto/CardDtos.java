@@ -1,7 +1,7 @@
 package com.kanflow.api.dto;
 
 import com.kanflow.domain.enums.CardStatus;
-import com.kanflow.domain.enums.Dificuldade;
+import com.kanflow.validation.StoryPoints;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,7 +17,7 @@ public final class CardDtos {
     public record CardCreateRequest(
             @NotBlank @Size(max = 500) String titulo,
             String descricao,
-            @NotNull Dificuldade dificuldade,
+            @NotNull @StoryPoints Integer pontos,
             Integer tempoEstimado,
             @NotNull CardStatus status,
             UUID responsavelId,
@@ -30,7 +30,7 @@ public final class CardDtos {
     public record CardUpdateRequest(
             @NotBlank @Size(max = 500) String titulo,
             String descricao,
-            @NotNull Dificuldade dificuldade,
+            @NotNull @StoryPoints Integer pontos,
             Integer tempoEstimado,
             @NotNull CardStatus status,
             UUID responsavelId,
@@ -40,11 +40,10 @@ public final class CardDtos {
     ) {
     }
 
-    // PATCH: campos opcionais (mantém compatibilidade com o front, que atualiza só status às vezes)
     public record CardPatchRequest(
             @Size(max = 500) String titulo,
             String descricao,
-            Dificuldade dificuldade,
+            @StoryPoints Integer pontos,
             Integer tempoEstimado,
             CardStatus status,
             UUID responsavelId,
@@ -62,7 +61,7 @@ public final class CardDtos {
             UUID id,
             String titulo,
             String descricao,
-            Dificuldade dificuldade,
+            Integer pontos,
             Integer tempoEstimado,
             CardStatus status,
             UUID responsavelId,

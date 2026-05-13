@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface SprintHistoryRepository extends JpaRepository<SprintHistory, UUID> {
     List<SprintHistory> findAllByWorkspaceIdOrderByNumeroDesc(UUID workspaceId);
 
+    long countByWorkspace_Id(UUID workspaceId);
+
     @Query("select max(s.numero) from SprintHistory s where s.workspace.id = :workspaceId")
     Optional<Integer> findMaxNumeroByWorkspaceId(UUID workspaceId);
 }

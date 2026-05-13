@@ -11,11 +11,6 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    /**
-     * CORS na camada do Spring Security (evita 403 silencioso quando o {@code Origin}
-     * não casa com localhost/127.0.0.1 — ex.: IP da rede, outro host, Swagger em URL diferente).
-     * JWT vai no header {@code Authorization}; não precisamos de cookies cross-origin ({@code false}).
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

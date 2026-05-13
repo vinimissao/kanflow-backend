@@ -1,5 +1,6 @@
 package com.kanflow.api.error;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -35,15 +37,30 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", "conflict", "message", ex.getMessage(), "timestamp", Instant.now()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "internal", "message", "Erro interno", "timestamp", Instant.now()));
+    @ExceptionHandler(PlanLimitException.class)
+    public ResponseEntity<Map<String, Object>> handlePlanLimit(PlanLimitException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of(
+                        "error", "plan_limit",
+                        "message", ex.getMessage(),
+                        "timestamp", Instant.now()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleDenied(AccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", "forbidden", "message", "Acesso negado", "timestamp", Instant.now()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
+        log.error("Erro não tratado na API", ex);
+        String detail = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(
+                        "error", "internal",
+                        "message", "Erro interno",
+                        "detail", detail,
+                        "timestamp", Instant.now()));
     }
 }

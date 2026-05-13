@@ -11,6 +11,8 @@ import java.util.UUID;
 
 public interface CardRepository extends JpaRepository<Card, UUID> {
 
+    long countByWorkspace_Id(UUID workspaceId);
+
     @EntityGraph(attributePaths = "responsavel")
     @Override
     List<Card> findAll();
@@ -32,6 +34,7 @@ public interface CardRepository extends JpaRepository<Card, UUID> {
                 or lower(coalesce(c.descricao, '')) like lower(concat('%', :q, '%'))
                 or lower(coalesce(c.assignee, '')) like lower(concat('%', :q, '%'))
                 or lower(coalesce(r.nome, '')) like lower(concat('%', :q, '%'))
+                or cast(c.pontos as string) like concat('%', :q, '%')
               )
             order by c.posicao asc nulls last, c.criadoEm asc
             """)

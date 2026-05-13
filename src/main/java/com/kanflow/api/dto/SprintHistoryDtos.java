@@ -13,7 +13,11 @@ public class SprintHistoryDtos {
             UUID workspaceId,
             Integer numero,
             Instant startedAt,
-            Instant endedAt
+            Instant endedAt,
+            int cardsTotal,
+            int cardsDone,
+            int checklistTotal,
+            int checklistDone
     ) {}
 
     public record SprintSnapshotResponse(
@@ -21,7 +25,11 @@ public class SprintHistoryDtos {
             Integer numero,
             Instant startedAt,
             Instant endedAt,
-            Snapshot snapshot
+            Snapshot snapshot,
+            int cardsTotal,
+            int cardsDone,
+            int checklistTotal,
+            int checklistDone
     ) {}
 
     public record Snapshot(

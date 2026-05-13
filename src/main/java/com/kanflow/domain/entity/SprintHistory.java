@@ -39,6 +39,18 @@ public class SprintHistory {
     @Column(name = "ended_at", nullable = false)
     private Instant endedAt;
 
+    @Column(name = "cards_total", nullable = false)
+    private Integer cardsTotal = 0;
+
+    @Column(name = "cards_done", nullable = false)
+    private Integer cardsDone = 0;
+
+    @Column(name = "checklist_total", nullable = false)
+    private Integer checklistTotal = 0;
+
+    @Column(name = "checklist_done", nullable = false)
+    private Integer checklistDone = 0;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private Instant criadoEm;
 

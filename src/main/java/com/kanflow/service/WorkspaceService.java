@@ -10,6 +10,7 @@ import com.kanflow.api.error.ResourceNotFoundException;
 import com.kanflow.domain.entity.BoardColumn;
 import com.kanflow.domain.entity.Usuario;
 import com.kanflow.domain.entity.Workspace;
+import com.kanflow.billing.BillingService;
 import com.kanflow.repository.BoardColumnRepository;
 import com.kanflow.repository.UsuarioRepository;
 import com.kanflow.repository.WorkspaceRepository;
@@ -28,6 +29,7 @@ public class WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final BoardColumnRepository boardColumnRepository;
     private final UsuarioRepository usuarioRepository;
+    private final BillingService billingService;
 
     @Transactional(readOnly = true)
     public List<WorkspaceResponse> list(UUID ownerId) {
@@ -39,6 +41,7 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceResponse create(UUID ownerId, WorkspaceCreateRequest req) {
+        billingService.assertCanCreateWorkspace(ownerId);
         Usuario owner = usuarioRepository.findById(ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
@@ -101,7 +104,6 @@ public class WorkspaceService {
 
     @Transactional(readOnly = true)
     public BoardResponse getBoard(UUID ownerId, UUID workspaceId) {
-        // reuse ownership check
         get(ownerId, workspaceId);
         List<ColumnResponse> cols = boardColumnRepository.findAllByWorkspaceIdOrderByOrdemAsc(workspaceId)
                 .stream()

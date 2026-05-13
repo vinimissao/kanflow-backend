@@ -8,5 +8,7 @@ import java.util.UUID;
 
 public interface WorkspaceRepository extends JpaRepository<Workspace, UUID> {
     List<Workspace> findAllByOwnerIdOrderByCriadoEmAsc(UUID ownerId);
+
+    long countByOwner_Id(UUID ownerId);
 }
 

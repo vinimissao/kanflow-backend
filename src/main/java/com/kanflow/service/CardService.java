@@ -62,7 +62,7 @@ public class CardService {
         Card c = new Card();
         c.setTitulo(req.titulo());
         c.setDescricao(req.descricao());
-        c.setDificuldade(req.dificuldade());
+        c.setPontos(req.pontos());
         c.setTempoEstimado(req.tempoEstimado());
         c.setStatus(req.status());
         c.setResponsavel(resolveResponsavel(req.responsavelId()));
@@ -78,7 +78,7 @@ public class CardService {
                 .orElseThrow(() -> new ResourceNotFoundException("Card não encontrado: " + id));
         c.setTitulo(req.titulo());
         c.setDescricao(req.descricao());
-        c.setDificuldade(req.dificuldade());
+        c.setPontos(req.pontos());
         c.setTempoEstimado(req.tempoEstimado());
         c.setStatus(req.status());
         c.setResponsavel(resolveResponsavel(req.responsavelId()));
@@ -95,7 +95,7 @@ public class CardService {
 
         if (req.titulo() != null) c.setTitulo(req.titulo());
         if (req.descricao() != null) c.setDescricao(req.descricao());
-        if (req.dificuldade() != null) c.setDificuldade(req.dificuldade());
+        if (req.pontos() != null) c.setPontos(req.pontos());
         if (req.tempoEstimado() != null) c.setTempoEstimado(req.tempoEstimado());
         if (req.status() != null) c.setStatus(req.status());
         if (req.responsavelId() != null) c.setResponsavel(resolveResponsavel(req.responsavelId()));
@@ -153,7 +153,7 @@ public class CardService {
                 c.getId(),
                 c.getTitulo(),
                 c.getDescricao(),
-                c.getDificuldade(),
+                c.getPontos(),
                 c.getTempoEstimado(),
                 c.getStatus(),
                 r != null ? r.getId() : null,

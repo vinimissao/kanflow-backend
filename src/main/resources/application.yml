@@ -1,5 +1,3 @@
-# PostgreSQL local: utilizador postgres, base de dados kanflow (Flyway aplica as migrações).
-# Se 28P01: confirma no pgAdmin a senha do utilizador postgres ou sobrescreve em config/application.yml.
 spring:
   application:
     name: kanflow-backend
@@ -18,13 +16,17 @@ spring:
   flyway:
     enabled: true
 
-# Se der "Port ... was already in use", muda o número ou define: set SERVER_PORT=9090
 server:
   port: ${SERVER_PORT:9090}
 
+kanflow:
+  billing:
+    mock-confirmation: ${KANFLOW_BILLING_MOCK:true}
+  seed-demo:
+    run: ${KANFLOW_SEED_DEMO_RUN:false}
+
 security:
   jwt:
-    # Para dev: sobrescreva via env var JWT_SECRET (ex.: set JWT_SECRET=...).
     secret: ${JWT_SECRET:dev-only-change-me-dev-only-change-me}
     access-token-seconds: ${JWT_ACCESS_TOKEN_SECONDS:3600}
 

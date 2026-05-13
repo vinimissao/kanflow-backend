@@ -1,7 +1,6 @@
 package com.kanflow.domain.entity;
 
 import com.kanflow.domain.enums.CardStatus;
-import com.kanflow.domain.enums.Dificuldade;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -37,9 +36,8 @@ public class Card {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private Dificuldade dificuldade;
+    @Column(name = "pontos", nullable = false)
+    private Integer pontos;
 
     @Column(name = "tempo_estimado")
     private Integer tempoEstimado;
