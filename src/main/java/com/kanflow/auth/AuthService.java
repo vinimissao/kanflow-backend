@@ -1,7 +1,9 @@
 package com.kanflow.auth;
 
 import com.kanflow.api.error.ConflictException;
+import com.kanflow.api.error.ForbiddenOperationException;
 import com.kanflow.api.error.ResourceNotFoundException;
+import com.kanflow.domain.enums.PerfilUsuario;
 import com.kanflow.auth.AuthDtos.AuthResponse;
 import com.kanflow.auth.AuthDtos.ChangePasswordRequest;
 import com.kanflow.auth.AuthDtos.LoginRequest;
@@ -33,6 +35,10 @@ public class AuthService {
         String email = req.email().trim().toLowerCase();
         if (usuarioRepository.existsByEmailIgnoreCase(email)) {
             throw new ConflictException("E-mail já cadastrado");
+        }
+        if (req.perfil() == PerfilUsuario.admin) {
+            throw new ForbiddenOperationException(
+                    "Registo público não permite perfil admin. Use a conta de administrador de demonstração ou peça a um admin.");
         }
         Usuario u = new Usuario();
         u.setNome(req.nome().trim());

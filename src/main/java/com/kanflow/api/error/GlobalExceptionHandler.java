@@ -37,6 +37,12 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", "conflict", "message", ex.getMessage(), "timestamp", Instant.now()));
     }
 
+    @ExceptionHandler(ForbiddenOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleForbiddenOperation(ForbiddenOperationException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", "forbidden", "message", ex.getMessage(), "timestamp", Instant.now()));
+    }
+
     @ExceptionHandler(PlanLimitException.class)
     public ResponseEntity<Map<String, Object>> handlePlanLimit(PlanLimitException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)

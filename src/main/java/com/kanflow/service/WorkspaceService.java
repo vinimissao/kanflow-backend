@@ -14,6 +14,7 @@ import com.kanflow.billing.BillingService;
 import com.kanflow.repository.BoardColumnRepository;
 import com.kanflow.repository.UsuarioRepository;
 import com.kanflow.repository.WorkspaceRepository;
+import com.kanflow.security.WorkspaceAccessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +31,11 @@ public class WorkspaceService {
     private final BoardColumnRepository boardColumnRepository;
     private final UsuarioRepository usuarioRepository;
     private final BillingService billingService;
+    private final WorkspaceAccessService workspaceAccessService;
 
     @Transactional(readOnly = true)
-    public List<WorkspaceResponse> list(UUID ownerId) {
-        return workspaceRepository.findAllByOwnerIdOrderByCriadoEmAsc(ownerId)
+    public List<WorkspaceResponse> list(UUID userId) {
+        return workspaceAccessService.listAccessible(userId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -72,39 +74,29 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public WorkspaceResponse get(UUID ownerId, UUID workspaceId) {
-        Workspace w = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado: " + workspaceId));
-        if (!w.getOwner().getId().equals(ownerId)) {
-            throw new ResourceNotFoundException("Workspace não encontrado: " + workspaceId);
-        }
+    public WorkspaceResponse get(UUID userId, UUID workspaceId) {
+        Workspace w = workspaceAccessService.requireAccess(userId, workspaceId);
         return toResponse(w);
     }
 
     @Transactional
-    public WorkspaceResponse update(UUID ownerId, UUID workspaceId, WorkspaceUpdateRequest req) {
-        Workspace w = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado: " + workspaceId));
-        if (!w.getOwner().getId().equals(ownerId)) {
-            throw new ResourceNotFoundException("Workspace não encontrado: " + workspaceId);
-        }
+    public WorkspaceResponse update(UUID userId, UUID workspaceId, WorkspaceUpdateRequest req) {
+        Workspace w = workspaceAccessService.requireOwner(userId, workspaceId);
+        workspaceAccessService.requireWrite(userId, workspaceId);
         w.setNome(req.nome().trim());
         return toResponse(workspaceRepository.save(w));
     }
 
     @Transactional
-    public void delete(UUID ownerId, UUID workspaceId) {
-        Workspace w = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado: " + workspaceId));
-        if (!w.getOwner().getId().equals(ownerId)) {
-            throw new ResourceNotFoundException("Workspace não encontrado: " + workspaceId);
-        }
+    public void delete(UUID userId, UUID workspaceId) {
+        Workspace w = workspaceAccessService.requireOwner(userId, workspaceId);
+        workspaceAccessService.requireWrite(userId, workspaceId);
         workspaceRepository.delete(w);
     }
 
     @Transactional(readOnly = true)
-    public BoardResponse getBoard(UUID ownerId, UUID workspaceId) {
-        get(ownerId, workspaceId);
+    public BoardResponse getBoard(UUID userId, UUID workspaceId) {
+        workspaceAccessService.requireRead(userId, workspaceId);
         List<ColumnResponse> cols = boardColumnRepository.findAllByWorkspaceIdOrderByOrdemAsc(workspaceId)
                 .stream()
                 .map(c -> new ColumnResponse(c.getId(), c.getNome(), c.getOrdem()))
@@ -113,8 +105,8 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public BoardResponse putBoard(UUID ownerId, UUID workspaceId, List<ColumnCreate> columns) {
-        get(ownerId, workspaceId);
+    public BoardResponse putBoard(UUID userId, UUID workspaceId, List<ColumnCreate> columns) {
+        workspaceAccessService.requireWrite(userId, workspaceId);
         boardColumnRepository.deleteAllByWorkspaceId(workspaceId);
         Workspace w = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado: " + workspaceId));
@@ -130,11 +122,10 @@ public class WorkspaceService {
             col.setOrdem(c.ordem());
             boardColumnRepository.save(col);
         }
-        return getBoard(ownerId, workspaceId);
+        return getBoard(userId, workspaceId);
     }
 
     private WorkspaceResponse toResponse(Workspace w) {
         return new WorkspaceResponse(w.getId(), w.getNome(), w.getCriadoEm());
     }
 }
-

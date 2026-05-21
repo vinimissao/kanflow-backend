@@ -1,5 +1,7 @@
 package com.kanflow.auth;
 
+import com.kanflow.domain.enums.PerfilUsuario;
+import com.kanflow.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,9 +22,11 @@ import java.util.UUID;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UsuarioRepository usuarioRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UsuarioRepository usuarioRepository) {
         this.jwtService = jwtService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -33,16 +38,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = auth.substring("Bearer ".length()).trim();
             try {
                 UUID userId = jwtService.parseUserId(token);
+                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+                usuarioRepository.findById(userId).ifPresent(u -> authorities.add(roleAuthority(u.getPerfil())));
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
                         userId,
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                        authorities
                 );
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception ignored) {
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private static SimpleGrantedAuthority roleAuthority(PerfilUsuario perfil) {
+        return switch (perfil) {
+            case admin -> new SimpleGrantedAuthority("ROLE_ADMIN");
+            case membro -> new SimpleGrantedAuthority("ROLE_MEMBRO");
+            case visualizador -> new SimpleGrantedAuthority("ROLE_VISUALIZADOR");
+        };
     }
 }
 

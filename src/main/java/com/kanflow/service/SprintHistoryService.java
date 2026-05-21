@@ -22,7 +22,7 @@ import com.kanflow.repository.ChecklistItemRepository;
 import com.kanflow.repository.ComentarioRepository;
 import com.kanflow.repository.SprintHistoryRepository;
 import com.kanflow.repository.SprintSnapshotRepository;
-import com.kanflow.repository.WorkspaceRepository;
+import com.kanflow.security.WorkspaceAccessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SprintHistoryService {
 
-    private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceAccessService workspaceAccessService;
     private final CardRepository cardRepository;
     private final BoardColumnRepository boardColumnRepository;
     private final SprintHistoryRepository sprintHistoryRepository;
@@ -51,13 +51,9 @@ public class SprintHistoryService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional
-    public SprintSnapshotResponse completeSprint(UUID ownerId, UUID workspaceId) {
-        Workspace w = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado: " + workspaceId));
-        if (!w.getOwner().getId().equals(ownerId)) {
-            throw new ResourceNotFoundException("Workspace não encontrado: " + workspaceId);
-        }
-        billingService.assertSprintHistoryWrite(ownerId);
+    public SprintSnapshotResponse completeSprint(UUID userId, UUID workspaceId) {
+        Workspace w = workspaceAccessService.requireWrite(userId, workspaceId);
+        billingService.assertSprintHistoryWrite(userId);
 
         int nextNumero = sprintHistoryRepository.findMaxNumeroByWorkspaceId(workspaceId)
                 .map(n -> n + 1)
@@ -114,12 +110,8 @@ public class SprintHistoryService {
     }
 
     @Transactional
-    public void blankBoard(UUID ownerId, UUID workspaceId) {
-        Workspace w = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado: " + workspaceId));
-        if (!w.getOwner().getId().equals(ownerId)) {
-            throw new ResourceNotFoundException("Workspace não encontrado: " + workspaceId);
-        }
+    public void blankBoard(UUID userId, UUID workspaceId) {
+        workspaceAccessService.requireWrite(userId, workspaceId);
         List<Card> cards = cardRepository.findAllByWorkspaceIdOrderByPosicaoAscCriadoEmAsc(workspaceId);
         purgeWorkspaceCards(cards);
     }
@@ -136,13 +128,9 @@ public class SprintHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<SprintHistoryResponse> list(UUID ownerId, UUID workspaceId) {
-        Workspace w = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado: " + workspaceId));
-        if (!w.getOwner().getId().equals(ownerId)) {
-            throw new ResourceNotFoundException("Workspace não encontrado: " + workspaceId);
-        }
-        if (!billingService.sprintHistoryReadable(ownerId)) {
+    public List<SprintHistoryResponse> list(UUID userId, UUID workspaceId) {
+        workspaceAccessService.requireRead(userId, workspaceId);
+        if (!billingService.sprintHistoryReadable(userId)) {
             return List.of();
         }
         List<SprintHistory> histories = sprintHistoryRepository.findAllByWorkspaceIdOrderByNumeroDesc(workspaceId);
@@ -158,19 +146,17 @@ public class SprintHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public SprintSnapshotResponse getSnapshot(UUID ownerId, UUID workspaceId, UUID sprintHistoryId) {
-        Workspace w = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado: " + workspaceId));
-        if (!w.getOwner().getId().equals(ownerId)) {
-            throw new ResourceNotFoundException("Workspace não encontrado: " + workspaceId);
-        }
+    public SprintSnapshotResponse getSnapshot(UUID userId, UUID workspaceId, UUID sprintHistoryId) {
+        workspaceAccessService.requireRead(userId, workspaceId);
 
         SprintHistory h = sprintHistoryRepository.findById(sprintHistoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Sprint não encontrada: " + sprintHistoryId));
         if (!h.getWorkspace().getId().equals(workspaceId)) {
             throw new ResourceNotFoundException("Sprint não encontrada: " + sprintHistoryId);
         }
-        billingService.assertSprintHistoryWrite(ownerId);
+        if (!billingService.sprintHistoryReadable(userId)) {
+            throw new ResourceNotFoundException("Sprint não encontrada: " + sprintHistoryId);
+        }
 
         SprintSnapshot ss = sprintSnapshotRepository.findBySprintHistoryId(sprintHistoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Snapshot não encontrado: " + sprintHistoryId));

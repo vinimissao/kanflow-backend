@@ -14,7 +14,7 @@ import java.util.List;
 public class OpenApiConfig {
 
     @Bean
-    public OpenAPI kanflowOpenAPI(@Value("${server.port:9090}") int serverPort) {
+    public OpenAPI kanflowOpenAPI(@Value("${server.port:8080}") int serverPort) {
         String localhost = "http://localhost:" + serverPort;
         String loopback = "http://127.0.0.1:" + serverPort;
         return new OpenAPI()

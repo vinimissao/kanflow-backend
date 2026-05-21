@@ -19,13 +19,13 @@ services:
       - ./:/app
       - m2_cache:/root/.m2
     environment:
-      SERVER_PORT: ${PORT:-9090}
+      SERVER_PORT: ${PORT:-8080}
       JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-dev-only-change-me}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-kanflow}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-kanflow}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-12345678}
     ports:
-      - "${PORT:-9090}:${PORT:-9090}"
+      - "${PORT:-8080}:${PORT:-8080}"
     depends_on:
       - postgres
     command: >

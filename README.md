@@ -65,7 +65,7 @@ O Spring Boot carrega `config/application.yml` com **prioridade** sobre `src/mai
 | Variável | Efeito | Exemplo |
 |----------|--------|---------|
 | `JWT_SECRET` | Chave de assinatura do JWT (mínimo recomendado: segredo forte; o código faz padding se for curto) | `set JWT_SECRET=...` (CMD) ou `$env:JWT_SECRET="..."` (PowerShell) |
-| `SERVER_PORT` | Porta HTTP do servidor | `9090` (padrão no YAML) |
+| `SERVER_PORT` | Porta HTTP do servidor | `8080` (padrão no YAML) |
 | `SPRING_DATASOURCE_URL` | URL JDBC (sobrescreve YAML) | usado pelo Docker Compose na API |
 | `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` | Credenciais JDBC | idem |
 | `KANFLOW_BILLING_MOCK` | Confirmação simulada de pagamento (`true`/`false`) | `true` em dev |
@@ -95,7 +95,7 @@ $env:JWT_SECRET = "dev-only-change-me-dev-only-change-me"
 mvn spring-boot:run
 ```
 
-4. API (por defeito): `http://localhost:9090`
+4. API (por defeito): `http://localhost:8080`
 
 ### B) Maven + H2 (sem PostgreSQL)
 
@@ -132,14 +132,14 @@ O ficheiro **`.env`** é lido pelo **Docker Compose**, não pelo `mvn spring-boo
 
 ### Porta já em uso
 
-Se aparecer `Port 9090 was already in use`:
+Se aparecer `Port 8080 was already in use`:
 
 ```powershell
 $env:SERVER_PORT = "9091"
 mvn spring-boot:run
 ```
 
-Ou encerra o processo que está à escuta na 9090.
+Ou encerra o processo que está à escuta na 8080.
 
 ---
 
@@ -168,10 +168,10 @@ Se a política de execução do PowerShell bloquear `.ps1`, usa o comando com `-
 
 ## Swagger / OpenAPI
 
-| Recurso | URL (porta por defeito 9090) |
+| Recurso | URL (porta por defeito 8080) |
 |---------|------------------------------|
-| Swagger UI | `http://localhost:9090/swagger-ui.html` |
-| OpenAPI JSON | `http://localhost:9090/api-docs` |
+| Swagger UI | `http://localhost:8080/swagger-ui.html` |
+| OpenAPI JSON | `http://localhost:8080/api-docs` |
 
 ---
 

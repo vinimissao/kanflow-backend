@@ -1,9 +1,7 @@
 package com.kanflow.api;
 
 import com.kanflow.api.dto.CardDtos.CardResponse;
-import com.kanflow.api.error.ResourceNotFoundException;
-import com.kanflow.domain.entity.Workspace;
-import com.kanflow.repository.WorkspaceRepository;
+import com.kanflow.security.WorkspaceAccessService;
 import com.kanflow.service.CardService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.Authentication;
@@ -21,23 +19,18 @@ import java.util.UUID;
 @Tag(name = "Workspace Search", description = "Busca de cards por texto dentro do workspace.")
 public class WorkspaceSearchController {
 
-    private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceAccessService workspaceAccessService;
     private final CardService cardService;
 
-    public WorkspaceSearchController(WorkspaceRepository workspaceRepository, CardService cardService) {
-        this.workspaceRepository = workspaceRepository;
+    public WorkspaceSearchController(WorkspaceAccessService workspaceAccessService, CardService cardService) {
+        this.workspaceAccessService = workspaceAccessService;
         this.cardService = cardService;
     }
 
     @GetMapping("/search")
     public List<CardResponse> search(Authentication authentication, @PathVariable UUID workspaceId, @RequestParam String q) {
         UUID userId = (UUID) authentication.getPrincipal();
-        Workspace w = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Workspace não encontrado: " + workspaceId));
-        if (!w.getOwner().getId().equals(userId)) {
-            throw new ResourceNotFoundException("Workspace não encontrado: " + workspaceId);
-        }
+        workspaceAccessService.requireRead(userId, workspaceId);
         return cardService.buscarPorTexto(workspaceId, q);
     }
 }
-
